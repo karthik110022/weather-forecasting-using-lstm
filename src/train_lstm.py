@@ -1,6 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout, BatchNormalization
+from tensorflow.keras.layers import LSTM, Dense, Dropout, BatchNormalization, Conv1D, MaxPooling1D
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
 from data_preprocessing import load_and_clean, scale_features, create_sequences
@@ -11,7 +11,10 @@ set_seed()
 
 def build_model(input_shape):
     model = Sequential([
-        LSTM(64, return_sequences=True, input_shape=input_shape),
+        Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=input_shape),
+        MaxPooling1D(pool_size=2),
+        
+        LSTM(64, return_sequences=True),
         BatchNormalization(),
         Dropout(0.3),
 
@@ -40,14 +43,14 @@ def train():
     model = build_model((SEQ_LEN, X.shape[2]))
 
     callbacks = [
-        EarlyStopping(patience=7, restore_best_weights=True),
-        ReduceLROnPlateau(patience=3)
+        EarlyStopping(patience=8, restore_best_weights=True),
+        ReduceLROnPlateau(patience=4)
     ]
 
     model.fit(
         X_train, y_train,
-        epochs=40,
-        batch_size=32,
+        epochs=60,
+        batch_size=64,
         validation_split=0.1,
         callbacks=callbacks,
         verbose=1

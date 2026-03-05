@@ -11,9 +11,13 @@ def evaluate():
     
     # Load previously fitted scaler instead of fitting a new one (prevents data leakage)
     scaler = joblib.load("models/scaler.pkl")
-    scaled = scaler.transform(df[FEATURES])
+    scaled_arr = scaler.transform(df[FEATURES])
     
-    X, y = create_sequences(scaled)
+    import pandas as pd
+    scaled_df = pd.DataFrame(scaled_arr, columns=FEATURES)
+    scaled_df['city'] = df['city'].values
+    
+    X, y = create_sequences(scaled_df)
 
     split = int(len(X) * TRAIN_SPLIT)
     X_test, y_test = X[split:], y[split:]

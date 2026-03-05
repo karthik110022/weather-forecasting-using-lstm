@@ -38,9 +38,8 @@ def load_and_clean(path):
     # convert date
     df['date'] = pd.to_datetime(df['date'])
 
-    # filter city safely
-    df['city'] = df['city'].astype(str)
-    df = df[df['city'].str.lower() == CITY.lower()].sort_values('date')
+    # ENSURE PROPER SORTING FOR ALL CITIES
+    df = df.sort_values(['city', 'date'])
 
     # fill missing
     df = df.fillna(method='ffill').fillna(method='bfill')
@@ -51,11 +50,20 @@ def scale_features(df):
     scaler = MinMaxScaler()
     scaled = scaler.fit_transform(df[FEATURES])
     joblib.dump(scaler, "models/scaler.pkl")
-    return scaled, scaler
+    
+    # Return scaled data attached to city labels to safely group them later
+    df_scaled = pd.DataFrame(scaled, columns=FEATURES)
+    df_scaled['city'] = df['city'].values
+    return df_scaled, scaler
 
-def create_sequences(data):
+def create_sequences(df_scaled):
     X, y = [], []
-    for i in range(len(data) - SEQ_LEN):
-        X.append(data[i:i+SEQ_LEN])
-        y.append(data[i+SEQ_LEN][TARGET_INDEX])
+    
+    # Create sequences strictly WITHIN each city to prevent timeline bleeding
+    for city_name, city_group in df_scaled.groupby('city'):
+        data = city_group[FEATURES].values
+        for i in range(len(data) - SEQ_LEN):
+            X.append(data[i:i+SEQ_LEN])
+            y.append(data[i+SEQ_LEN][TARGET_INDEX])
+            
     return np.array(X), np.array(y)
