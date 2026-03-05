@@ -4,9 +4,15 @@ from utils import print_metrics
 from config import *
 
 def evaluate():
+    import joblib
+    
     # load and prepare data
     df = load_and_clean("data/indian_cities_weather.csv")
-    scaled, _ = scale_features(df)
+    
+    # Load previously fitted scaler instead of fitting a new one (prevents data leakage)
+    scaler = joblib.load("models/scaler.pkl")
+    scaled = scaler.transform(df[FEATURES])
+    
     X, y = create_sequences(scaled)
 
     split = int(len(X) * TRAIN_SPLIT)
