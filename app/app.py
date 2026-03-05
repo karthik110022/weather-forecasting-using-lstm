@@ -68,9 +68,11 @@ if len(city_df) >= SEQ_LEN:
     latest_scaled = scaler.transform(latest)
     X_input = np.expand_dims(latest_scaled, axis=0)
 
-    if st.button("Generate Forecast"):
-
-        pred = model.predict(X_input, verbose=0)
+    if st.button("Generate Forecast", type="primary"):
+        with st.spinner("Generating forecast..."):
+            # Direct call avoids hang in Streamlit on some systems (e.g. macOS) compared to model.predict()
+            pred_tensor = model(X_input, training=False)
+            pred = pred_tensor.numpy()
 
         st.metric("Predicted Avg Temp", f"{pred[0][0]:.3f}")
         st.metric("Predicted Rainfall", f"{pred[0][1]:.3f}")
