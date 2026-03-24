@@ -6,5 +6,6 @@ scikit-learn
 tensorflow
 statsmodels
 streamlit
+streamlit-js-eval
 plotly
 joblib

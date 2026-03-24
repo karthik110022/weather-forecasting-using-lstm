@@ -12,6 +12,7 @@ import plotly.graph_objects as go
 import streamlit as st
 import streamlit.components.v1 as components
 import tensorflow as tf
+from streamlit_js_eval import get_geolocation
 
 # Ensure the root directory is in the Python path so Streamlit can find 'src'
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -874,44 +875,6 @@ def find_nearest_supported_city(latitude, longitude):
     return ranked[0]
 
 
-def request_browser_location():
-    components.html(
-        """
-        <script>
-        const run = () => {
-          if (!navigator.geolocation) {
-            const url = new URL(window.top.location.href);
-            url.searchParams.set("geo_error", "Browser geolocation is not supported.");
-            url.searchParams.set("geo_ts", Date.now().toString());
-            window.top.location.href = url.toString();
-            return;
-          }
-
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              const url = new URL(window.top.location.href);
-              url.searchParams.set("geo_lat", position.coords.latitude.toFixed(6));
-              url.searchParams.set("geo_lon", position.coords.longitude.toFixed(6));
-              url.searchParams.set("geo_ts", Date.now().toString());
-              url.searchParams.delete("geo_error");
-              window.top.location.href = url.toString();
-            },
-            (error) => {
-              const url = new URL(window.top.location.href);
-              url.searchParams.set("geo_error", error.message || "Location permission denied.");
-              url.searchParams.set("geo_ts", Date.now().toString());
-              window.top.location.href = url.toString();
-            },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-          );
-        };
-        run();
-        </script>
-        """,
-        height=0,
-    )
-
-
 model = load_model()
 scaler = load_scaler()
 df = load_data()
@@ -937,52 +900,45 @@ st.session_state.setdefault("prediction_mode", "preset")
 st.session_state.setdefault("generate_forecast", False)
 st.session_state.setdefault("request_browser_location", False)
 st.session_state.setdefault("auto_location_attempted", False)
-
-if hasattr(st, "experimental_get_query_params"):
-    query_params = st.experimental_get_query_params()
-elif hasattr(st, "query_params"):
-    query_params = {key: [value] for key, value in st.query_params.items()}
-else:
-    query_params = {}
-geo_ts = query_params.get("geo_ts", [None])[0]
-
-if geo_ts and geo_ts != st.session_state.get("handled_geo_ts"):
-    st.session_state["handled_geo_ts"] = geo_ts
-    st.session_state["request_browser_location"] = False
-
-    geo_error = query_params.get("geo_error", [None])[0]
-    geo_lat = query_params.get("geo_lat", [None])[0]
-    geo_lon = query_params.get("geo_lon", [None])[0]
-
-    if geo_lat and geo_lon:
-        browser_lat = float(geo_lat)
-        browser_lon = float(geo_lon)
-        nearest_city, nearest_distance_km = find_nearest_supported_city(browser_lat, browser_lon)
-        from src.api import reverse_geocode_location
-
-        try:
-            resolved_browser_label = reverse_geocode_location(browser_lat, browser_lon)
-        except Exception:
-            resolved_browser_label = f"Current location ({browser_lat:.2f}, {browser_lon:.2f})"
-        st.session_state["browser_location"] = {
-            "label": resolved_browser_label,
-            "latitude": browser_lat,
-            "longitude": browser_lon,
-            "nearest_city": nearest_city,
-            "nearest_distance_km": nearest_distance_km,
-        }
-        st.session_state["location_mode"] = "browser"
-    elif geo_error:
-        st.session_state["geo_error_message"] = geo_error
+st.session_state.setdefault("geo_request_key", 0)
 
 if (
     not st.session_state.get("auto_location_attempted")
     and not st.session_state.get("browser_location")
-    and not geo_ts
 ):
     st.session_state["auto_location_attempted"] = True
     st.session_state["request_browser_location"] = True
     st.session_state["location_mode"] = "browser"
+
+if st.session_state.get("request_browser_location"):
+    geo_result = get_geolocation(component_key=f"live_geo_{st.session_state['geo_request_key']}")
+    if geo_result:
+        st.session_state["request_browser_location"] = False
+        coords = geo_result.get("coords")
+        geo_error = geo_result.get("error")
+
+        if coords:
+            browser_lat = float(coords["latitude"])
+            browser_lon = float(coords["longitude"])
+            nearest_city, nearest_distance_km = find_nearest_supported_city(browser_lat, browser_lon)
+            from src.api import reverse_geocode_location
+
+            try:
+                resolved_browser_label = reverse_geocode_location(browser_lat, browser_lon)
+            except Exception:
+                resolved_browser_label = f"Current location ({browser_lat:.2f}, {browser_lon:.2f})"
+
+            st.session_state["browser_location"] = {
+                "label": resolved_browser_label,
+                "latitude": browser_lat,
+                "longitude": browser_lon,
+                "nearest_city": nearest_city,
+                "nearest_distance_km": nearest_distance_km,
+            }
+            st.session_state["location_mode"] = "browser"
+            st.rerun()
+        elif geo_error:
+            st.session_state["geo_error_message"] = geo_error.get("message", "Location permission denied.")
 
 from src.api import get_live_weather_data
 
@@ -1170,6 +1126,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 if use_live_location_btn:
     st.session_state["location_mode"] = "browser"
     st.session_state["request_browser_location"] = True
+    st.session_state["geo_request_key"] += 1
     st.rerun()
 
 st.markdown('<div class="spacer-sm"></div>', unsafe_allow_html=True)
@@ -1214,9 +1171,6 @@ with control_col:
         help="Enabled: pulls the latest 60-day history from Open-Meteo. Disabled: uses the dataset bundled with this project.",
         key="use_live_weather",
     )
-
-    if st.session_state.get("request_browser_location"):
-        request_browser_location()
 
     if generate_btn:
         option_mode, option_value = location_labels[selected_location_option]
