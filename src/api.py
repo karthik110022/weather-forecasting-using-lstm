@@ -16,16 +16,81 @@ CITY_COORDINATES = {
     "Bhopal": {"lat": 23.2599, "lon": 77.4126}
 }
 
-def get_live_weather_data(city: str, days: int = 60) -> pd.DataFrame:
+
+def geocode_location(query: str, count: int = 1) -> list[dict]:
+    if not query.strip():
+        raise ValueError("Location query cannot be empty.")
+
+    response = requests.get(
+        "https://geocoding-api.open-meteo.com/v1/search",
+        params={"name": query.strip(), "count": count, "language": "en", "format": "json"},
+        timeout=15,
+    )
+    response.raise_for_status()
+    data = response.json()
+    results = data.get("results") or []
+    if not results:
+        raise ValueError(f"No location matches found for '{query}'.")
+    return results
+
+
+def format_location_label(location: dict) -> str:
+    parts = [
+        location.get("name"),
+        location.get("admin1"),
+        location.get("country"),
+    ]
+    return ", ".join(part for part in parts if part)
+
+
+def reverse_geocode_location(latitude: float, longitude: float) -> str:
+    response = requests.get(
+        "https://nominatim.openstreetmap.org/reverse",
+        params={
+            "lat": latitude,
+            "lon": longitude,
+            "format": "jsonv2",
+            "zoom": 12,
+            "addressdetails": 1,
+        },
+        headers={"User-Agent": "SkyCastAI/1.0"},
+        timeout=15,
+    )
+    response.raise_for_status()
+    data = response.json()
+    address = data.get("address", {})
+
+    parts = [
+        address.get("city")
+        or address.get("town")
+        or address.get("village")
+        or address.get("municipality")
+        or address.get("county")
+        or data.get("name"),
+        address.get("state_district") or address.get("state"),
+    ]
+    label = ", ".join(part for part in parts if part)
+    return label or "Near your location"
+
+
+def get_live_weather_data(
+    city: str | None = None,
+    days: int = 60,
+    latitude: float | None = None,
+    longitude: float | None = None,
+) -> pd.DataFrame:
     """
     Fetches the last N past days of historical weather data from Open-Meteo API
     for a given city, and formats it to exactly match the model's required 8 features.
     """
-    if city not in CITY_COORDINATES:
-        raise ValueError(f"Coordinates for city '{city}' not found.")
-        
-    lat = CITY_COORDINATES[city]["lat"]
-    lon = CITY_COORDINATES[city]["lon"]
+    if latitude is None or longitude is None:
+        if city not in CITY_COORDINATES:
+            raise ValueError(f"Coordinates for city '{city}' not found.")
+        lat = CITY_COORDINATES[city]["lat"]
+        lon = CITY_COORDINATES[city]["lon"]
+    else:
+        lat = latitude
+        lon = longitude
     
     # Calculate dates
     end_date = datetime.now().date() - timedelta(days=1)
@@ -51,7 +116,7 @@ def get_live_weather_data(city: str, days: int = 60) -> pd.DataFrame:
         "timezone": "auto"
     }
     
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=20)
     response.raise_for_status()
     data = response.json()
     
