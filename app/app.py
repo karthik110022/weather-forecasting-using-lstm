@@ -12,6 +12,7 @@ import plotly.graph_objects as go
 import streamlit as st
 import streamlit.components.v1 as components
 import tensorflow as tf
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from streamlit_js_eval import get_geolocation
 
 # Ensure the root directory is in the Python path so Streamlit can find 'src'
@@ -796,6 +797,53 @@ def load_data():
     return df
 
 
+@st.cache_data
+def evaluate_saved_model():
+    dataset = load_data().sort_values(["city", "date"]).reset_index(drop=True)
+    scaled_arr = scaler.transform(dataset[features])
+    scaled_df = pd.DataFrame(scaled_arr, columns=features)
+    scaled_df["city"] = dataset["city"].values
+
+    X_eval, y_eval = [], []
+    for _, city_group in scaled_df.groupby("city"):
+        city_values = city_group[features].values
+        for i in range(len(city_values) - SEQ_LEN):
+            X_eval.append(city_values[i : i + SEQ_LEN])
+            y_eval.append(city_values[i + SEQ_LEN][[2, 4]])
+
+    X_eval = np.array(X_eval)
+    y_eval = np.array(y_eval)
+    split = int(len(X_eval) * 0.7)
+    X_test = X_eval[split:]
+    y_test = y_eval[split:]
+
+    pred_scaled = model(X_test, training=False).numpy()
+    y_true_full = np.zeros((len(y_test), len(features)))
+    y_pred_full = np.zeros((len(pred_scaled), len(features)))
+    y_true_full[:, 2] = y_test[:, 0]
+    y_true_full[:, 4] = y_test[:, 1]
+    y_pred_full[:, 2] = pred_scaled[:, 0]
+    y_pred_full[:, 4] = pred_scaled[:, 1]
+
+    y_true_real = scaler.inverse_transform(pd.DataFrame(y_true_full, columns=features))
+    y_pred_real = scaler.inverse_transform(pd.DataFrame(y_pred_full, columns=features))
+
+    true_temp = y_true_real[:, 2]
+    pred_temp = y_pred_real[:, 2]
+    true_rain = y_true_real[:, 4]
+    pred_rain = y_pred_real[:, 4]
+
+    return {
+        "samples": int(len(X_test)),
+        "temp_rmse": float(np.sqrt(mean_squared_error(true_temp, pred_temp))),
+        "temp_mae": float(mean_absolute_error(true_temp, pred_temp)),
+        "temp_r2": float(r2_score(true_temp, pred_temp)),
+        "rain_rmse": float(np.sqrt(mean_squared_error(true_rain, pred_rain))),
+        "rain_mae": float(mean_absolute_error(true_rain, pred_rain)),
+        "rain_r2": float(r2_score(true_rain, pred_rain)),
+    }
+
+
 def infer_conditions(avg_temp, rainfall, humidity, cloud_cover):
     if rainfall >= 12:
         return "Monsoon Pulse", "Heavy atmospheric moisture with strong precipitation signals."
@@ -875,11 +923,6 @@ def find_nearest_supported_city(latitude, longitude):
     return ranked[0]
 
 
-model = load_model()
-scaler = load_scaler()
-df = load_data()
-
-cities = sorted(df["city"].unique())
 features = [
     "max_temp",
     "min_temp",
@@ -891,6 +934,13 @@ features = [
     "cloud_cover",
 ]
 SEQ_LEN = 60
+
+model = load_model()
+scaler = load_scaler()
+df = load_data()
+evaluation_metrics = evaluate_saved_model()
+
+cities = sorted(df["city"].unique())
 
 default_city = "Hyderabad" if "Hyderabad" in cities else cities[0]
 st.session_state.setdefault("target_city", default_city)
@@ -1037,8 +1087,8 @@ condition_name, condition_copy = infer_conditions(avg_temp_now, rainfall_now, hu
 
 forecast_ready = False
 prediction_current_avg = float(latest.iloc[-1]["avg_temp"])
-avg_temp_pred = prediction_current_avg + (latest["avg_temp"].iloc[-1] - latest["avg_temp"].iloc[-7]) / 7
-rainfall_pred = max(latest["rainfall"].tail(7).mean(), 0.0)
+avg_temp_pred = None
+rainfall_pred = None
 
 if st.session_state.get("generate_forecast", False) and success_load:
     with st.spinner("Running neural sequence analysis..."):
@@ -1056,7 +1106,6 @@ if st.session_state.get("generate_forecast", False) and success_load:
         rainfall_pred = max(float(real_pred[0, 4]), 0.0)
         forecast_ready = True
 
-temp_delta_pred = avg_temp_pred - prediction_current_avg
 recent_temp_mean = latest["avg_temp"].tail(7).mean()
 recent_rain_mean = latest["rainfall"].tail(7).mean()
 recent_humidity_mean = latest["humidity"].tail(7).mean()
@@ -1064,6 +1113,31 @@ recent_wind_mean = latest["wind_speed"].tail(7).mean()
 trend_delta = latest["avg_temp"].iloc[-1] - latest["avg_temp"].iloc[-7]
 temp_range = latest["max_temp"].max() - latest["min_temp"].min()
 rainy_days = int((latest["rainfall"] > 0).sum())
+
+if forecast_ready:
+    temp_delta_pred = avg_temp_pred - prediction_current_avg
+    forecast_title = "Next-Day Model Forecast"
+    forecast_value = f"{avg_temp_pred:.1f}°C"
+    forecast_copy = (
+        f"Forecast for <strong>{prediction_label}</strong> with expected rain of "
+        f"<strong>{rainfall_pred:.1f} mm</strong> from the trained predictive model."
+    )
+    forecast_city_value = prediction_label
+    forecast_temp_value = f"{avg_temp_pred:.1f}°C"
+    forecast_rain_value = f"{rainfall_pred:.1f} mm"
+    forecast_shift_value = f"{temp_delta_pred:+.1f}°C"
+else:
+    temp_delta_pred = 0.0
+    forecast_title = "Next-Day Model Forecast"
+    forecast_value = "Awaiting run"
+    forecast_copy = (
+        "Choose a location and click <strong>Get Weather Prediction</strong> to run the "
+        "trained time-series model for tomorrow's forecast."
+    )
+    forecast_city_value = prediction_label
+    forecast_temp_value = "Pending"
+    forecast_rain_value = "Pending"
+    forecast_shift_value = "Pending"
 
 st.markdown(
     f"""
@@ -1074,6 +1148,7 @@ st.markdown(
                 <h1 class="hero-title">Tomorrow's Weather Forecast</h1>
                 <p class="hero-copy">
                     This project uses live Open-Meteo weather history and an LSTM model to estimate tomorrow's temperature for the selected location. It reads recent atmospheric patterns such as temperature, rainfall, humidity, wind, pressure, and cloud cover to give a simple next-day forecast view. The dashboard is designed to help users quickly compare today's observed weather with the model's prediction for the next day.
+                    This project applies time series analysis and predictive modeling to climate patterns by reading the previous 60 days of weather signals and forecasting the next day for the selected location.
                 </p>
             </div>
             <div class="hero-aside delay-2">
@@ -1197,27 +1272,27 @@ with prediction_col:
     st.markdown(
         f"""
         <div class="prediction-card delay-2">
-            <div class="prediction-label">Predicted Weather</div>
-            <div class="prediction-value">{avg_temp_pred:.1f}°C</div>
+            <div class="prediction-label">{forecast_title}</div>
+            <div class="prediction-value">{forecast_value}</div>
             <div class="prediction-copy">
-                Forecast for <strong>{prediction_label}</strong> with expected rain of <strong>{rainfall_pred:.1f} mm</strong>.
+                {forecast_copy}
             </div>
             <div class="hero-stats">
                 <div class="hero-stat">
-                    <div class="hero-stat-label">Predicted City</div>
-                    <div class="hero-stat-value">{prediction_label}</div>
+                    <div class="hero-stat-label">Forecast Target</div>
+                    <div class="hero-stat-value">{forecast_city_value}</div>
                 </div>
                 <div class="hero-stat">
                     <div class="hero-stat-label">Tomorrow Temp</div>
-                    <div class="hero-stat-value">{avg_temp_pred:.1f}°C</div>
+                    <div class="hero-stat-value">{forecast_temp_value}</div>
                 </div>
                 <div class="hero-stat">
                     <div class="hero-stat-label">Tomorrow Rain</div>
-                    <div class="hero-stat-value">{rainfall_pred:.1f} mm</div>
+                    <div class="hero-stat-value">{forecast_rain_value}</div>
                 </div>
                 <div class="hero-stat">
                     <div class="hero-stat-label">Temp Shift</div>
-                    <div class="hero-stat-value">{temp_delta_pred:+.1f}°C</div>
+                    <div class="hero-stat-value">{forecast_shift_value}</div>
                 </div>
             </div>
         </div>
@@ -1253,9 +1328,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.markdown('<div class="section-stack"><div class="section-label">Climate Playback</div><div class="section-title">See how the weather moved before the forecast.</div></div>', unsafe_allow_html=True)
+st.markdown('<div class="section-stack"><div class="section-label">Historical Input Data</div><div class="section-title">See how the weather moved before the forecast.</div></div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="section-copy">Instead of a single flat chart, the history section now breaks out temperature, moisture, and atmospheric pressure so the model context reads more like an operational weather console.</div>',
+    '<div class="section-copy">This section shows the 60-day time-series window used as model input. It breaks out temperature, moisture, rainfall, and pressure so the forecasting context is clear before tomorrow\'s prediction is generated.</div>',
     unsafe_allow_html=True,
 )
 
@@ -1381,22 +1456,38 @@ with tab_atmos:
         st.plotly_chart(pressure_fig, use_container_width=True)
 
 st.markdown('<div class="panel delay-4">', unsafe_allow_html=True)
-st.markdown('<div class="panel-title">Forecast Interpretation</div>', unsafe_allow_html=True)
-st.markdown(
-    f"""
-    <div class="panel-kicker">
-        The model is forecasting <strong>{avg_temp_pred:.1f}°C</strong> and
-        <strong>{rainfall_pred:.1f} mm</strong> next. That outlook is shaped by a recent sequence
-        where humidity averaged <strong>{recent_humidity_mean:.0f}%</strong>, wind averaged
-        <strong>{recent_wind_mean:.1f} km/h</strong>, and the active data source was
-        <strong>{data_mode}</strong>.
-    </div>
-    <div class="footnote">
-        If the live Open-Meteo request is unavailable, the app automatically falls back to the bundled dataset and still runs the same model pipeline.
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+st.markdown('<div class="panel-title">Forecast Summary</div>', unsafe_allow_html=True)
+if forecast_ready:
+    st.markdown(
+        f"""
+        <div class="panel-kicker">
+            The trained model forecasted <strong>{avg_temp_pred:.1f}°C</strong> and
+            <strong>{rainfall_pred:.1f} mm</strong> for the next day. The input sequence behind that
+            forecast had average humidity of <strong>{recent_humidity_mean:.0f}%</strong>, average wind of
+            <strong>{recent_wind_mean:.1f} km/h</strong>, and used <strong>{data_mode}</strong> as the active
+            data source.
+        </div>
+        <div class="footnote">
+            This summary combines model output with descriptive statistics from the same 60-day historical input window.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+else:
+    st.markdown(
+        f"""
+        <div class="panel-kicker">
+            This section summarizes the model output after a forecast run. The historical input window currently shows
+            average humidity of <strong>{recent_humidity_mean:.0f}%</strong>, average wind of
+            <strong>{recent_wind_mean:.1f} km/h</strong>, and <strong>{data_mode}</strong> as the active
+            data source.
+        </div>
+        <div class="footnote">
+            Click <strong>Get Weather Prediction</strong> to run the predictive model on this 60-day time-series sequence.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 metric_left, metric_right, metric_third = st.columns(3, gap="large")
 with metric_left:
     st.metric(
@@ -1417,3 +1508,64 @@ with metric_third:
         latest['date'].iloc[-1].strftime("Ends %b %d, %Y"),
     )
 st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown('<div class="section-stack"><div class="section-label">Model Evaluation</div><div class="section-title">How the saved predictive model performed on held-out test sequences.</div></div>', unsafe_allow_html=True)
+st.markdown(
+    '<div class="section-copy">These metrics are computed from the saved model on the project dataset using held-out time-series samples. They help distinguish the forecasting model from the historical analytics shown above.</div>',
+    unsafe_allow_html=True,
+)
+
+eval_cols = st.columns(3, gap="large")
+with eval_cols[0]:
+    st.markdown(
+        f"""
+        <div class="insight-card delay-1">
+            <div class="insight-title">Temperature RMSE</div>
+            <div class="insight-value">{evaluation_metrics['temp_rmse']:.2f}°C</div>
+            <div class="insight-copy">Root mean squared error for next-day average temperature on {evaluation_metrics['samples']} held-out sequences.</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+with eval_cols[1]:
+    st.markdown(
+        f"""
+        <div class="insight-card delay-2">
+            <div class="insight-title">Temperature MAE</div>
+            <div class="insight-value">{evaluation_metrics['temp_mae']:.2f}°C</div>
+            <div class="insight-copy">Mean absolute error for predicted next-day average temperature.</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+with eval_cols[2]:
+    st.markdown(
+        f"""
+        <div class="insight-card delay-3">
+            <div class="insight-title">Rainfall RMSE</div>
+            <div class="insight-value">{evaluation_metrics['rain_rmse']:.2f} mm</div>
+            <div class="insight-copy">Root mean squared error for next-day rainfall on the same held-out sequences.</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+eval_metric_left, eval_metric_mid, eval_metric_right = st.columns(3, gap="large")
+with eval_metric_left:
+    st.metric(
+        "Temperature R2",
+        f"{evaluation_metrics['temp_r2']:.3f}",
+        f"MAE {evaluation_metrics['temp_mae']:.2f}°C",
+    )
+with eval_metric_mid:
+    st.metric(
+        "Rainfall R2",
+        f"{evaluation_metrics['rain_r2']:.3f}",
+        f"MAE {evaluation_metrics['rain_mae']:.2f} mm",
+    )
+with eval_metric_right:
+    st.metric(
+        "Evaluation split",
+        f"{evaluation_metrics['samples']} samples",
+        "Held-out test sequences",
+    )
