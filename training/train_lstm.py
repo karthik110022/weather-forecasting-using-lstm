@@ -56,7 +56,8 @@ def train():
         verbose=1
     )
 
-    model.save("models/lstm_model.h5")
+    # Save with explicit compile settings for better compatibility
+    model.save("models/lstm_model.h5", include_optimizer=False)
     print("Model saved successfully")
 
 if __name__ == "__main__":

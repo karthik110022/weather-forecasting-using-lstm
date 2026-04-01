@@ -215,26 +215,21 @@ st.markdown(
             overflow: hidden;
         }
 
-        .hero-aside::before {
-            content: "";
+        .weather-icon-wrap {
             position: absolute;
-            inset: 14% 12% auto auto;
-            width: 170px;
-            height: 170px;
-            border-radius: 50%;
-            border: 1px dashed rgba(104, 215, 255, 0.18);
-            opacity: 0.6;
+            inset: 12% 8% auto auto;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.85;
         }
 
-        .hero-aside::after {
-            content: "";
-            position: absolute;
-            inset: 19% 17% auto auto;
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            border: 1px solid rgba(104, 215, 255, 0.14);
-            box-shadow: 0 0 28px rgba(104, 215, 255, 0.08);
+        .weather-icon-wrap svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 20px rgba(104, 215, 255, 0.25));
         }
 
         .hero-aside-top {
@@ -395,6 +390,149 @@ st.markdown(
 
         .panel-strong {
             background: var(--panel-strong);
+        }
+
+        .mission-control {
+            background: linear-gradient(145deg, rgba(14, 80, 120, 0.9), rgba(7, 27, 40, 0.95));
+            border: 2px solid rgba(104, 215, 255, 0.3);
+            border-radius: 28px;
+            padding: 1.5rem;
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.35),
+                0 0 40px rgba(104, 215, 255, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mission-control::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(104, 215, 255, 0.06) 0%, transparent 50%);
+            animation: pulseGlow 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .mission-control-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .mission-control-kicker {
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1.2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .mission-control .stSelectbox,
+        .mission-control .stCheckbox {
+            position: relative;
+            z-index: 1;
+        }
+
+        .mission-control [data-baseweb="select"] {
+            border-radius: 14px !important;
+            border: 1px solid rgba(104, 215, 255, 0.2) !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .mission-control [data-baseweb="select"]:hover {
+            border-color: rgba(104, 215, 255, 0.4) !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 0 20px rgba(104, 215, 255, 0.15) !important;
+        }
+
+        .mission-control [data-baseweb="select"]:focus {
+            border-color: rgba(104, 215, 255, 0.6) !important;
+            box-shadow: 0 0 25px rgba(104, 215, 255, 0.25) !important;
+        }
+
+        .mission-control [data-baseweb="select"] > div {
+            background: transparent !important;
+            border-radius: 14px !important;
+        }
+
+        .mission-control .stSelectbox label {
+            color: var(--accent) !important;
+            font-size: 0.8rem !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.1em !important;
+            margin-bottom: 0.4rem !important;
+        }
+
+        .mission-control [data-baseweb="popover"] {
+            background: rgba(7, 27, 40, 0.98) !important;
+            border: 1px solid rgba(104, 215, 255, 0.2) !important;
+            border-radius: 14px !important;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(104, 215, 255, 0.1) !important;
+            backdrop-filter: blur(20px) !important;
+        }
+
+        .mission-control [data-baseweb="option"] {
+            background: transparent !important;
+            border-radius: 10px !important;
+            padding: 0.6rem 1rem !important;
+            transition: all 0.2s ease !important;
+        }
+
+        .mission-control [data-baseweb="option"]:hover {
+            background: rgba(104, 215, 255, 0.15) !important;
+        }
+
+        .mission-control [data-baseweb="option"]:focus {
+            background: rgba(104, 215, 255, 0.2) !important;
+        }
+
+        .mission-control [aria-selected="true"] {
+            background: rgba(14, 165, 233, 0.3) !important;
+            color: var(--text) !important;
+        }
+
+        .mission-control .stCheckbox {
+            margin-top: 0.8rem;
+        }
+
+        .mission-control .stCheckbox > label {
+            color: var(--muted) !important;
+            font-size: 0.85rem !important;
+        }
+
+        .mission-control .stButton > button {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            border: 1px solid rgba(104, 215, 255, 0.4);
+            font-size: 1.05rem;
+            font-weight: 700;
+            padding: 0.6rem 1.5rem;
+            box-shadow: 0 8px 24px rgba(14, 165, 233, 0.35);
+        }
+
+        .mission-control .stButton > button:hover {
+            background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+            box-shadow: 0 12px 32px rgba(14, 165, 233, 0.45);
+            transform: translateY(-2px);
+        }
+
+        .mission-control-info {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(104, 215, 255, 0.12);
+            position: relative;
+            z-index: 1;
         }
 
         .panel-title {
@@ -907,6 +1045,113 @@ def haversine_km(lat1, lon1, lat2, lon2):
     return 2 * earth_radius_km * asin(sqrt(a))
 
 
+def calculate_feels_like(temp_c, humidity, wind_speed):
+    """Calculate apparent temperature (feels like) using simplified heat index and wind chill."""
+    if temp_c >= 20 and wind_speed < 4.8:
+        # Heat index for warm temperatures
+        T = temp_c
+        RH = humidity
+        HI = (
+            -8.78469475556
+            + 1.61139411 * T
+            + 2.33854883889 * RH
+            - 0.14611605 * T * RH
+            - 0.012308094 * T ** 2
+            - 0.0164248277778 * RH ** 2
+            + 0.002211732 * T ** 2 * RH
+            + 0.00072546 * T * RH ** 2
+            - 0.000003582 * T ** 2 * RH ** 2
+        )
+        return max(HI, temp_c)
+    elif temp_c < 10 and wind_speed > 4.8:
+        # Wind chill for cold temperatures
+        V = wind_speed ** 0.16
+        WC = 13.12 + 0.6215 * temp_c - 11.37 * V + 0.3965 * temp_c * V
+        return min(WC, temp_c)
+    return temp_c
+
+
+def get_weather_icon_svg(cloud_cover, rainfall, avg_temp, humidity):
+    """Return an SVG weather icon based on conditions."""
+    # Determine weather type
+    is_rainy = rainfall >= 2
+    is_cloudy = cloud_cover >= 60
+    is_hot = avg_temp >= 32
+
+    if is_rainy:
+        # Rain icon
+        return '''<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="rainCloud" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#8fb5c8"/>
+                    <stop offset="100%" stop-color="#5a8fa8"/>
+                </linearGradient>
+            </defs>
+            <path d="M75 45c0-11-9-20-20-20-8.5 0-15.8 5.3-18.7 12.8C35.2 36.3 33 35 30.5 35c-4.1 0-7.5 3.4-7.5 7.5 0 0.4 0 0.7 0.1 1.1C18.2 44.7 15 48.7 15 53.5 15 58.8 19.2 63 24.5 63h50.5c5.2 0 9.5-4.2 9.5-9.5 0-5-3.9-9.2-8.9-9.5 0-0.3-0.1-0.7-0.1-1-0.5-0.1-1-0.1-1.5-0.1-8.8 0-16 7.2-16 16 0 0.2 0 0.5 0 0.7" fill="url(#rainCloud)"/>
+            <line x1="30" y1="70" x2="25" y2="82" stroke="#68d7ff" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="45" y1="68" x2="40" y2="80" stroke="#68d7ff" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="60" y1="70" x2="55" y2="82" stroke="#68d7ff" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="38" y1="78" x2="33" y2="90" stroke="#68d7ff" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="53" y1="76" x2="48" y2="88" stroke="#68d7ff" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="68" y1="78" x2="63" y2="90" stroke="#68d7ff" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>'''
+    elif is_cloudy:
+        # Cloudy icon
+        return '''<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="cloudGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#b8d4e3"/>
+                    <stop offset="100%" stop-color="#8fb5c8"/>
+                </linearGradient>
+            </defs>
+            <path d="M78 42c0-9.4-7.6-17-17-17-6.8 0-12.6 4-15.4 9.7C44.3 33.1 42.4 32 40.2 32c-3.9 0-7 3.1-7 7 0 0.4 0 0.8 0.1 1.1C29.6 40.9 27 44 27 48c0 4.4 3.6 8 8 8h47c4.4 0 8-3.6 8-8 0-4.4-3.6-8-8-8h-1c0-5.5-4.5-10-10-10-1.4 0-2.7 0.3-3.9 0.8C68.8 26.2 73 21.8 78 21c-1.8-1.2-4-2-6.4-2-7.2 0-13 5.8-13 13 0 0.5 0 1 0.1 1.5" fill="url(#cloudGrad)"/>
+            <circle cx="55" cy="38" r="12" fill="#ffb36b" opacity="0.9"/>
+            <circle cx="62" cy="33" r="6" fill="#ffd700" opacity="0.8"/>
+        </svg>'''
+    elif is_hot:
+        # Sunny hot icon
+        return '''<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="sunGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ffd700"/>
+                    <stop offset="100%" stop-color="#ffb36b"/>
+                </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="22" fill="url(#sunGrad)"/>
+            <g stroke="#ffb36b" stroke-width="3" stroke-linecap="round">
+                <line x1="50" y1="12" x2="50" y2="20"/>
+                <line x1="50" y1="80" x2="50" y2="88"/>
+                <line x1="12" y1="50" x2="20" y2="50"/>
+                <line x1="80" y1="50" x2="88" y2="50"/>
+                <line x1="23" y1="23" x2="29" y2="29"/>
+                <line x1="71" y1="71" x2="77" y2="77"/>
+                <line x1="23" y1="77" x2="29" y2="71"/>
+                <line x1="71" y1="29" x2="77" y2="23"/>
+            </g>
+        </svg>'''
+    else:
+        # Clear/sunny icon
+        return '''<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="clearGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#68d7ff"/>
+                    <stop offset="100%" stop-color="#0ea5e9"/>
+                </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="20" fill="url(#clearGrad)"/>
+            <g stroke="#68d7ff" stroke-width="2.5" stroke-linecap="round" opacity="0.8">
+                <line x1="50" y1="14" x2="50" y2="22"/>
+                <line x1="50" y1="78" x2="50" y2="86"/>
+                <line x1="14" y1="50" x2="22" y2="50"/>
+                <line x1="78" y1="50" x2="86" y2="50"/>
+                <line x1="25" y1="25" x2="31" y2="31"/>
+                <line x1="69" y1="69" x2="75" y2="75"/>
+                <line x1="25" y1="75" x2="31" y2="69"/>
+                <line x1="69" y1="31" x2="75" y2="25"/>
+            </g>
+        </svg>'''
+
+
 def find_nearest_supported_city(latitude, longitude):
     from src.api import CITY_COORDINATES
 
@@ -1035,15 +1280,14 @@ prediction_city_df = df[df["city"] == prediction_fallback_city].sort_values("dat
 
 if use_live_data:
     try:
-        with st.spinner("Syncing live weather history..."):
-            if live_coords:
-                live_latest = get_live_weather_data(
-                    days=SEQ_LEN,
-                    latitude=live_coords[0],
-                    longitude=live_coords[1],
-                )
-            else:
-                live_latest = get_live_weather_data(live_label, days=SEQ_LEN)
+        if live_coords:
+            live_latest = get_live_weather_data(
+                days=SEQ_LEN,
+                latitude=live_coords[0],
+                longitude=live_coords[1],
+            )
+        else:
+            live_latest = get_live_weather_data(live_label, days=SEQ_LEN)
         data_mode = "Live Open-Meteo"
         success_load = True
         load_issue = None
@@ -1084,6 +1328,47 @@ wind_now = float(live_row["wind_speed"])
 pressure_now = float(live_row["pressure"])
 cloud_now = float(live_row["cloud_cover"])
 condition_name, condition_copy = infer_conditions(avg_temp_now, rainfall_now, humidity_now, cloud_now)
+
+# Fetch actual current weather from Open-Meteo Forecast API
+from src.api import get_current_weather as fetch_current_weather, get_weather_description
+
+try:
+    if live_coords:
+        current_weather = fetch_current_weather(latitude=live_coords[0], longitude=live_coords[1])
+    else:
+        current_weather = fetch_current_weather(live_fallback_city)
+
+    # Use actual current weather for the live section
+    actual_current_temp = current_weather["current_temp"]
+    actual_feels_like = current_weather["feels_like"]
+    actual_humidity = current_weather["humidity"]
+    actual_precipitation = current_weather["precipitation"]
+    actual_wind = current_weather["wind_speed"]
+    actual_pressure = current_weather["pressure"]
+    actual_cloud = current_weather["cloud_cover"]
+    actual_weather_code = current_weather["weather_code"]
+    actual_weather_desc = get_weather_description(actual_weather_code)
+    actual_current_time = current_weather["time"]
+
+    live_data_mode = "Live Open-Meteo (Current)"
+    use_current_for_live = True
+except Exception:
+    # Fallback to archive data if forecast API fails
+    actual_current_temp = avg_temp_now
+    actual_feels_like = calculate_feels_like(avg_temp_now, humidity_now, wind_now)
+    actual_humidity = humidity_now
+    actual_precipitation = rainfall_now
+    actual_wind = wind_now
+    actual_pressure = pressure_now
+    actual_cloud = cloud_now
+    actual_weather_desc = condition_name
+    actual_current_time = None
+    live_data_mode = f"{data_mode} (Forecast API unavailable)"
+    use_current_for_live = False
+
+# Calculate additional live weather metrics for the hero-aside
+feels_like_now = actual_feels_like
+weather_icon_svg = get_weather_icon_svg(actual_cloud, actual_precipitation, actual_current_temp, actual_humidity)
 
 forecast_ready = False
 prediction_current_avg = float(latest.iloc[-1]["avg_temp"])
@@ -1144,45 +1429,46 @@ st.markdown(
     <section class="hero-shell">
         <div class="hero-grid">
             <div class="hero-copy-wrap">
-                <div class="eyebrow">Geographic Forecast Console</div>
-                <h1 class="hero-title">Tomorrow's Weather Forecast</h1>
-                <p class="hero-copy">
-                    This project uses live Open-Meteo weather history and an LSTM model to estimate tomorrow's temperature for the selected location. It reads recent atmospheric patterns such as temperature, rainfall, humidity, wind, pressure, and cloud cover to give a simple next-day forecast view. The dashboard is designed to help users quickly compare today's observed weather with the model's prediction for the next day.
-                    This project applies time series analysis and predictive modeling to climate patterns by reading the previous 60 days of weather signals and forecasting the next day for the selected location.
+                <div class="eyebrow">Time Series Analysis</div>
+                <h1 class="hero-title" style="white-space: normal; word-break: normal;">Weather Forecasting Using Time Series Analysis: Predictive Modeling for Climate Patterns</h1>
+                <p class="hero-copy" style="max-width: 100%; font-size: 1rem; line-height: 1.6; margin-top: 0.8rem;">
+                    A deep learning model that predicts tomorrow's temperature and rainfall by analyzing the last 60 days of weather patterns. Select any of the 32 supported Indian cities or use your live location to get instant weather forecasts powered by LSTM neural networks trained on Open-Meteo historical data.<br><br>
+                    The CNN-LSTM architecture captures both local patterns and long-term dependencies in weather sequences, providing accurate next-day predictions. Weather data includes temperature, humidity, rainfall, wind speed, pressure, and cloud cover for comprehensive climate analysis.<br><br>
+                    Built with TensorFlow/Keras for deep learning, Streamlit for the web interface, and Open-Meteo API for real-time weather data across major Indian cities.
                 </p>
             </div>
             <div class="hero-aside delay-2">
                 <div class="hero-aside-top">
                     <div>
-                        <p class="hero-aside-title">{live_label} weather briefing</p>
-                        <div class="hero-aside-copy">Live weather snapshot for now, with tomorrow's prediction shown separately for the selected city.</div>
+                        <p class="hero-aside-title">{live_label} - Current Weather</p>
                     </div>
-                    <div class="signal-pill">{data_mode}</div>
+                    <div class="signal-pill">{live_data_mode}</div>
                 </div>
-                <div class="hero-temp">{avg_temp_now:.1f}°C</div>
-                <div class="hero-temp-sub">Today: {live_today} • Live data date: {latest_data_date}</div>
-                <div class="hero-stats">
+                <div class="weather-icon-wrap">{weather_icon_svg}</div>
+                <div class="hero-temp">{actual_current_temp:.1f}°C</div>
+                <div class="hero-temp-sub" style="margin-bottom: 1rem;">Today: {live_today}{f" • Updated: {actual_current_time}" if actual_current_time else ""}</div>
+                <div class="hero-stats" style="margin-top: 0.9rem;">
                     <div class="hero-stat">
                         <div class="hero-stat-label">Condition</div>
-                        <div class="hero-stat-value">{condition_name}</div>
+                        <div class="hero-stat-value">{actual_weather_desc}</div>
                     </div>
                     <div class="hero-stat">
-                        <div class="hero-stat-label">Today's Rainfall</div>
-                        <div class="hero-stat-value">{rainfall_now:.1f} mm</div>
+                        <div class="hero-stat-label">Precipitation</div>
+                        <div class="hero-stat-value">{actual_precipitation:.1f} mm</div>
                     </div>
                     <div class="hero-stat">
-                        <div class="hero-stat-label">Today's Humidity</div>
-                        <div class="hero-stat-value">{humidity_now:.0f}%</div>
+                        <div class="hero-stat-label">Humidity</div>
+                        <div class="hero-stat-value">{actual_humidity:.0f}%</div>
                     </div>
                 </div>
-                <div class="hero-radar">
+                <div class="hero-radar" style="margin-top: 0.9rem;">
                     <div class="hero-radar-grid">
                         <div class="hero-radar-item">
-                            <div class="hero-radar-value">{wind_now:.1f} km/h</div>
+                            <div class="hero-radar-value">{actual_wind:.1f} km/h</div>
                             <div class="hero-radar-label">Wind</div>
                         </div>
                         <div class="hero-radar-item">
-                            <div class="hero-radar-value">{pressure_now:.0f} hPa</div>
+                            <div class="hero-radar-value">{actual_pressure:.0f} hPa</div>
                             <div class="hero-radar-label">Pressure</div>
                         </div>
                     </div>
@@ -1209,10 +1495,10 @@ st.markdown('<div class="spacer-sm"></div>', unsafe_allow_html=True)
 control_col, prediction_col = st.columns([1, 1], gap="large")
 
 with control_col:
-    st.markdown('<div class="panel panel-strong delay-1">', unsafe_allow_html=True)
-    st.markdown('<div class="panel-title">Mission Control</div>', unsafe_allow_html=True)
+    st.markdown('<div class="mission-control delay-1">', unsafe_allow_html=True)
+    st.markdown('<div class="mission-control-title">Mission Control</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="panel-kicker">Choose a location from the dropdown and get the predicted weather for tomorrow.</div>',
+        '<div class="mission-control-kicker">Select a city and click the button to predict tomorrow\'s weather using CNN-LSTM neural network.</div>',
         unsafe_allow_html=True,
     )
 
@@ -1233,7 +1519,7 @@ with control_col:
         default_option = location_options[0]
 
     selected_location_option = st.selectbox(
-        "Choose Location",
+        "Choose City",
         location_options,
         index=location_options.index(default_option),
     )
@@ -1255,17 +1541,13 @@ with control_col:
         st.session_state["generate_forecast"] = True
         st.rerun()
 
+    st.markdown('<div class="mission-control-info">', unsafe_allow_html=True)
     st.caption(f"Active location: {live_label}")
-    st.caption(live_location_status)
     st.caption(f"Prediction target: {prediction_label}")
     st.caption(f"Live date: {live_today} • latest data used: {latest_data_date}")
-
-    if st.session_state.get("geo_error_message"):
-        st.caption(f"Location issue: {st.session_state['geo_error_message']}")
-        st.session_state["geo_error_message"] = None
     if load_issue:
-        st.caption(f"Live fetch was unavailable. Using saved history instead. Details: {load_issue}")
-
+        st.caption(f"Live fetch was unavailable. Using saved history instead.")
+    st.markdown('</div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 with prediction_col:
@@ -1369,6 +1651,8 @@ with insight_cols[2]:
         unsafe_allow_html=True,
     )
 
+st.markdown('<div class="spacer-sm"></div>', unsafe_allow_html=True)
+
 tab_temp, tab_rain, tab_atmos = st.tabs(["Temperature Field", "Rainfall Pulse", "Atmospheric Signals"])
 
 with tab_temp:
@@ -1454,118 +1738,3 @@ with tab_atmos:
             color="#ffb36b",
         )
         st.plotly_chart(pressure_fig, use_container_width=True)
-
-st.markdown('<div class="panel delay-4">', unsafe_allow_html=True)
-st.markdown('<div class="panel-title">Forecast Summary</div>', unsafe_allow_html=True)
-if forecast_ready:
-    st.markdown(
-        f"""
-        <div class="panel-kicker">
-            The trained model forecasted <strong>{avg_temp_pred:.1f}°C</strong> and
-            <strong>{rainfall_pred:.1f} mm</strong> for the next day. The input sequence behind that
-            forecast had average humidity of <strong>{recent_humidity_mean:.0f}%</strong>, average wind of
-            <strong>{recent_wind_mean:.1f} km/h</strong>, and used <strong>{data_mode}</strong> as the active
-            data source.
-        </div>
-        <div class="footnote">
-            This summary combines model output with descriptive statistics from the same 60-day historical input window.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-else:
-    st.markdown(
-        f"""
-        <div class="panel-kicker">
-            This section summarizes the model output after a forecast run. The historical input window currently shows
-            average humidity of <strong>{recent_humidity_mean:.0f}%</strong>, average wind of
-            <strong>{recent_wind_mean:.1f} km/h</strong>, and <strong>{data_mode}</strong> as the active
-            data source.
-        </div>
-        <div class="footnote">
-            Click <strong>Get Weather Prediction</strong> to run the predictive model on this 60-day time-series sequence.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-metric_left, metric_right, metric_third = st.columns(3, gap="large")
-with metric_left:
-    st.metric(
-        "7-day average temperature",
-        f"{recent_temp_mean:.1f}°C",
-        f"{recent_temp_mean - latest['avg_temp'].head(7).mean():+.1f}°C vs first week",
-    )
-with metric_right:
-    st.metric(
-        "7-day average rainfall",
-        f"{recent_rain_mean:.1f} mm",
-        f"{latest['rainfall'].tail(7).sum():.1f} mm accumulated",
-    )
-with metric_third:
-    st.metric(
-        "Sequence length",
-        f"{len(latest)} days",
-        latest['date'].iloc[-1].strftime("Ends %b %d, %Y"),
-    )
-st.markdown("</div>", unsafe_allow_html=True)
-
-st.markdown('<div class="section-stack"><div class="section-label">Model Evaluation</div><div class="section-title">How the saved predictive model performed on held-out test sequences.</div></div>', unsafe_allow_html=True)
-st.markdown(
-    '<div class="section-copy">These metrics are computed from the saved model on the project dataset using held-out time-series samples. They help distinguish the forecasting model from the historical analytics shown above.</div>',
-    unsafe_allow_html=True,
-)
-
-eval_cols = st.columns(3, gap="large")
-with eval_cols[0]:
-    st.markdown(
-        f"""
-        <div class="insight-card delay-1">
-            <div class="insight-title">Temperature RMSE</div>
-            <div class="insight-value">{evaluation_metrics['temp_rmse']:.2f}°C</div>
-            <div class="insight-copy">Root mean squared error for next-day average temperature on {evaluation_metrics['samples']} held-out sequences.</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-with eval_cols[1]:
-    st.markdown(
-        f"""
-        <div class="insight-card delay-2">
-            <div class="insight-title">Temperature MAE</div>
-            <div class="insight-value">{evaluation_metrics['temp_mae']:.2f}°C</div>
-            <div class="insight-copy">Mean absolute error for predicted next-day average temperature.</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-with eval_cols[2]:
-    st.markdown(
-        f"""
-        <div class="insight-card delay-3">
-            <div class="insight-title">Rainfall RMSE</div>
-            <div class="insight-value">{evaluation_metrics['rain_rmse']:.2f} mm</div>
-            <div class="insight-copy">Root mean squared error for next-day rainfall on the same held-out sequences.</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-eval_metric_left, eval_metric_mid, eval_metric_right = st.columns(3, gap="large")
-with eval_metric_left:
-    st.metric(
-        "Temperature R2",
-        f"{evaluation_metrics['temp_r2']:.3f}",
-        f"MAE {evaluation_metrics['temp_mae']:.2f}°C",
-    )
-with eval_metric_mid:
-    st.metric(
-        "Rainfall R2",
-        f"{evaluation_metrics['rain_r2']:.3f}",
-        f"MAE {evaluation_metrics['rain_mae']:.2f} mm",
-    )
-with eval_metric_right:
-    st.metric(
-        "Evaluation split",
-        f"{evaluation_metrics['samples']} samples",
-        "Held-out test sequences",
-    )
