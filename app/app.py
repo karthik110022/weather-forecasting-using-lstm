@@ -903,6 +903,20 @@ st.markdown(
 )
 
 
+@st.cache_data(ttl=120, show_spinner=False)
+def check_internet():
+    """Fast connectivity check — just tests if we can reach Open-Meteo."""
+    import socket
+    try:
+        socket.create_connection(("api.open-meteo.com", 443), timeout=2).close()
+        return True
+    except Exception:
+        return False
+
+
+is_online = check_internet()
+
+
 @st.cache_resource
 def load_model():
     return tf.keras.models.load_model("models/lstm_model.h5", compile=False)
@@ -1198,14 +1212,15 @@ st.session_state.setdefault("auto_location_attempted", False)
 st.session_state.setdefault("geo_request_key", 0)
 
 if (
-    not st.session_state.get("auto_location_attempted")
+    is_online
+    and not st.session_state.get("auto_location_attempted")
     and not st.session_state.get("browser_location")
 ):
     st.session_state["auto_location_attempted"] = True
     st.session_state["request_browser_location"] = True
     st.session_state["location_mode"] = "browser"
 
-if st.session_state.get("request_browser_location"):
+if is_online and st.session_state.get("request_browser_location"):
     geo_result = get_geolocation(component_key=f"live_geo_{st.session_state['geo_request_key']}")
     if geo_result:
         st.session_state["request_browser_location"] = False
@@ -1239,6 +1254,8 @@ from src.api import get_live_weather_data
 
 selected_mode = st.session_state.get("location_mode", "preset")
 prediction_mode = st.session_state.get("prediction_mode", "preset")
+if not is_online:
+    st.session_state["use_live_weather"] = False
 use_live_data = st.session_state.get("use_live_weather", True)
 preset_city = st.session_state.get("target_city", default_city)
 prediction_city = st.session_state.get("prediction_city", default_city)
@@ -1332,28 +1349,42 @@ condition_name, condition_copy = infer_conditions(avg_temp_now, rainfall_now, hu
 # Fetch actual current weather from Open-Meteo Forecast API
 from src.api import get_current_weather as fetch_current_weather, get_weather_description
 
-try:
-    if live_coords:
-        current_weather = fetch_current_weather(latitude=live_coords[0], longitude=live_coords[1])
-    else:
-        current_weather = fetch_current_weather(live_fallback_city)
+if is_online:
+    try:
+        if live_coords:
+            current_weather = fetch_current_weather(latitude=live_coords[0], longitude=live_coords[1])
+        else:
+            current_weather = fetch_current_weather(live_fallback_city)
 
-    # Use actual current weather for the live section
-    actual_current_temp = current_weather["current_temp"]
-    actual_feels_like = current_weather["feels_like"]
-    actual_humidity = current_weather["humidity"]
-    actual_precipitation = current_weather["precipitation"]
-    actual_wind = current_weather["wind_speed"]
-    actual_pressure = current_weather["pressure"]
-    actual_cloud = current_weather["cloud_cover"]
-    actual_weather_code = current_weather["weather_code"]
-    actual_weather_desc = get_weather_description(actual_weather_code)
-    actual_current_time = current_weather["time"]
+        # Use actual current weather for the live section
+        actual_current_temp = current_weather["current_temp"]
+        actual_feels_like = current_weather["feels_like"]
+        actual_humidity = current_weather["humidity"]
+        actual_precipitation = current_weather["precipitation"]
+        actual_wind = current_weather["wind_speed"]
+        actual_pressure = current_weather["pressure"]
+        actual_cloud = current_weather["cloud_cover"]
+        actual_weather_code = current_weather["weather_code"]
+        actual_weather_desc = get_weather_description(actual_weather_code)
+        actual_current_time = current_weather["time"]
 
-    live_data_mode = "Live Open-Meteo (Current)"
-    use_current_for_live = True
-except Exception:
-    # Fallback to archive data if forecast API fails
+        live_data_mode = "Live Open-Meteo (Current)"
+        use_current_for_live = True
+    except Exception:
+        # Fallback to archive data if forecast API fails
+        actual_current_temp = avg_temp_now
+        actual_feels_like = calculate_feels_like(avg_temp_now, humidity_now, wind_now)
+        actual_humidity = humidity_now
+        actual_precipitation = rainfall_now
+        actual_wind = wind_now
+        actual_pressure = pressure_now
+        actual_cloud = cloud_now
+        actual_weather_desc = condition_name
+        actual_current_time = None
+        live_data_mode = f"{data_mode} (Forecast API unavailable)"
+        use_current_for_live = False
+else:
+    # Offline — use local dataset values
     actual_current_temp = avg_temp_now
     actual_feels_like = calculate_feels_like(avg_temp_now, humidity_now, wind_now)
     actual_humidity = humidity_now
@@ -1363,12 +1394,48 @@ except Exception:
     actual_cloud = cloud_now
     actual_weather_desc = condition_name
     actual_current_time = None
-    live_data_mode = f"{data_mode} (Forecast API unavailable)"
+    live_data_mode = "Offline Mode"
     use_current_for_live = False
 
 # Calculate additional live weather metrics for the hero-aside
 feels_like_now = actual_feels_like
 weather_icon_svg = get_weather_icon_svg(actual_cloud, actual_precipitation, actual_current_temp, actual_humidity)
+
+# Build the full hero section HTML
+from textwrap import dedent as _dedent
+
+if is_online:
+    _hero_aside = f"""\
+<div class="hero-aside delay-2">
+<div class="hero-aside-top">
+<div><p class="hero-aside-title">{live_label} - Current Weather</p></div>
+<div class="signal-pill">{live_data_mode}</div>
+</div>
+<div class="weather-icon-wrap">{weather_icon_svg}</div>
+<div class="hero-temp">{actual_current_temp:.1f}°C</div>
+<div class="hero-temp-sub" style="margin-bottom: 1rem;">Today: {live_today}{f" • Updated: {actual_current_time}" if actual_current_time else ""}</div>
+<div class="hero-stats" style="margin-top: 0.9rem;">
+<div class="hero-stat"><div class="hero-stat-label">Condition</div><div class="hero-stat-value">{actual_weather_desc}</div></div>
+<div class="hero-stat"><div class="hero-stat-label">Precipitation</div><div class="hero-stat-value">{actual_precipitation:.1f} mm</div></div>
+<div class="hero-stat"><div class="hero-stat-label">Humidity</div><div class="hero-stat-value">{actual_humidity:.0f}%</div></div>
+</div>
+<div class="hero-radar" style="margin-top: 0.9rem;">
+<div class="hero-radar-grid">
+<div class="hero-radar-item"><div class="hero-radar-value">{actual_wind:.1f} km/h</div><div class="hero-radar-label">Wind</div></div>
+<div class="hero-radar-item"><div class="hero-radar-value">{actual_pressure:.0f} hPa</div><div class="hero-radar-label">Pressure</div></div>
+</div>
+</div>
+</div>"""
+else:
+    _hero_aside = """\
+<div class="hero-aside delay-2">
+<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:2rem;">
+<div style="font-size:3rem;margin-bottom:0.8rem;">📡</div>
+<p class="hero-aside-title" style="margin:0;">Offline Mode</p>
+<p class="hero-aside-copy" style="max-width:100%;margin-top:0.6rem;">No internet connection detected. Live weather data is unavailable.<br><br>Select a city below and click <strong>Get Weather Prediction</strong> to forecast using the bundled dataset.</p>
+<div class="signal-pill" style="margin-top:1rem;">Dataset Mode</div>
+</div>
+</div>"""
 
 forecast_ready = False
 prediction_current_avg = float(latest.iloc[-1]["avg_temp"])
@@ -1424,71 +1491,34 @@ else:
     forecast_rain_value = "Pending"
     forecast_shift_value = "Pending"
 
-st.markdown(
-    f"""
-    <section class="hero-shell">
-        <div class="hero-grid">
-            <div class="hero-copy-wrap">
-                <div class="eyebrow">Time Series Analysis</div>
-                <h1 class="hero-title" style="white-space: normal; word-break: normal;">Weather Forecasting Using Time Series Analysis: Predictive Modeling for Climate Patterns</h1>
-                <p class="hero-copy" style="max-width: 100%; font-size: 1rem; line-height: 1.6; margin-top: 0.8rem;">
-                    A deep learning model that predicts tomorrow's temperature and rainfall by analyzing the last 60 days of weather patterns. Select any of the 32 supported Indian cities or use your live location to get instant weather forecasts powered by LSTM neural networks trained on Open-Meteo historical data.<br><br>
-                    The CNN-LSTM architecture captures both local patterns and long-term dependencies in weather sequences, providing accurate next-day predictions. Weather data includes temperature, humidity, rainfall, wind speed, pressure, and cloud cover for comprehensive climate analysis.<br><br>
-                    Built with TensorFlow/Keras for deep learning, Streamlit for the web interface, and Open-Meteo API for real-time weather data across major Indian cities.
-                </p>
-            </div>
-            <div class="hero-aside delay-2">
-                <div class="hero-aside-top">
-                    <div>
-                        <p class="hero-aside-title">{live_label} - Current Weather</p>
-                    </div>
-                    <div class="signal-pill">{live_data_mode}</div>
-                </div>
-                <div class="weather-icon-wrap">{weather_icon_svg}</div>
-                <div class="hero-temp">{actual_current_temp:.1f}°C</div>
-                <div class="hero-temp-sub" style="margin-bottom: 1rem;">Today: {live_today}{f" • Updated: {actual_current_time}" if actual_current_time else ""}</div>
-                <div class="hero-stats" style="margin-top: 0.9rem;">
-                    <div class="hero-stat">
-                        <div class="hero-stat-label">Condition</div>
-                        <div class="hero-stat-value">{actual_weather_desc}</div>
-                    </div>
-                    <div class="hero-stat">
-                        <div class="hero-stat-label">Precipitation</div>
-                        <div class="hero-stat-value">{actual_precipitation:.1f} mm</div>
-                    </div>
-                    <div class="hero-stat">
-                        <div class="hero-stat-label">Humidity</div>
-                        <div class="hero-stat-value">{actual_humidity:.0f}%</div>
-                    </div>
-                </div>
-                <div class="hero-radar" style="margin-top: 0.9rem;">
-                    <div class="hero-radar-grid">
-                        <div class="hero-radar-item">
-                            <div class="hero-radar-value">{actual_wind:.1f} km/h</div>
-                            <div class="hero-radar-label">Wind</div>
-                        </div>
-                        <div class="hero-radar-item">
-                            <div class="hero-radar-value">{actual_pressure:.0f} hPa</div>
-                            <div class="hero-radar-label">Pressure</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    """,
-    unsafe_allow_html=True,
-)
+_hero_html = f"""\
+<section class="hero-shell">
+<div class="hero-grid">
+<div class="hero-copy-wrap">
+<div class="eyebrow">Time Series Analysis</div>
+<h1 class="hero-title" style="white-space: normal; word-break: normal;">Weather Forecasting Using Time Series Analysis: Predictive Modeling for Climate Patterns</h1>
+<p class="hero-copy" style="max-width: 100%; font-size: 1rem; line-height: 1.6; margin-top: 0.8rem;">
+A deep learning model that predicts tomorrow's temperature and rainfall by analyzing the last 60 days of weather patterns. Select any of the 32 supported Indian cities or use your live location to get instant weather forecasts powered by LSTM neural networks trained on Open-Meteo historical data.<br><br>
+The CNN-LSTM architecture captures both local patterns and long-term dependencies in weather sequences, providing accurate next-day predictions. Weather data includes temperature, humidity, rainfall, wind speed, pressure, and cloud cover for comprehensive climate analysis.<br><br>
+Built with TensorFlow/Keras for deep learning, Streamlit for the web interface, and Open-Meteo API for real-time weather data across major Indian cities.
+</p>
+</div>
+{_hero_aside}
+</div>
+</section>
+"""
+st.markdown(_hero_html, unsafe_allow_html=True)
 
-st.markdown('<div class="hero-action-row">', unsafe_allow_html=True)
-use_live_location_btn = st.button("Use Live Location", use_container_width=False)
-st.markdown('</div>', unsafe_allow_html=True)
+if is_online:
+    st.markdown('<div class="hero-action-row">', unsafe_allow_html=True)
+    use_live_location_btn = st.button("Use Live Location", use_container_width=False)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-if use_live_location_btn:
-    st.session_state["location_mode"] = "browser"
-    st.session_state["request_browser_location"] = True
-    st.session_state["geo_request_key"] += 1
-    st.rerun()
+    if use_live_location_btn:
+        st.session_state["location_mode"] = "browser"
+        st.session_state["request_browser_location"] = True
+        st.session_state["geo_request_key"] += 1
+        st.rerun()
 
 st.markdown('<div class="spacer-sm"></div>', unsafe_allow_html=True)
 
@@ -1529,9 +1559,13 @@ with control_col:
     st.checkbox(
         "Use live Open-Meteo history",
         value=use_live_data,
-        help="Enabled: pulls the latest 60-day history from Open-Meteo. Disabled: uses the dataset bundled with this project.",
+        help="No internet connection. Using bundled dataset." if not is_online else "Enabled: pulls the latest 60-day history from Open-Meteo. Disabled: uses the dataset bundled with this project.",
         key="use_live_weather",
+        disabled=not is_online,
     )
+
+    if not is_online:
+        st.caption("⚠️ No internet — using bundled dataset for predictions.")
 
     if generate_btn:
         option_mode, option_value = location_labels[selected_location_option]
