@@ -38,11 +38,20 @@ def load_and_clean(path):
     # convert date
     df['date'] = pd.to_datetime(df['date'])
 
+    # inject cyclical seasonal features
+    df['month'] = df['date'].dt.month
+    df['day_of_year'] = df['date'].dt.dayofyear
+    
+    df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12.0)
+    df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12.0)
+    df['day_sin'] = np.sin(2 * np.pi * df['day_of_year'] / 365.25)
+    df['day_cos'] = np.cos(2 * np.pi * df['day_of_year'] / 365.25)
+
     # ENSURE PROPER SORTING FOR ALL CITIES
     df = df.sort_values(['city', 'date'])
 
     # fill missing
-    df = df.fillna(method='ffill').fillna(method='bfill')
+    df = df.ffill().bfill()
 
     return df
 

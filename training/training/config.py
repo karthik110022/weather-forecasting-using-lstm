@@ -5,7 +5,9 @@ RANDOM_SEED = 42
 FEATURES = [
     'max_temp','min_temp','avg_temp',
     'humidity','rainfall','wind_speed',
-    'pressure','cloud_cover'
+    'pressure','cloud_cover',
+    'month_sin', 'month_cos', 
+    'day_sin', 'day_cos'
 ]
 
 TARGET_INDEX = [2, 4]  # avg_temp, rainfall

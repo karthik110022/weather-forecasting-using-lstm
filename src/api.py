@@ -1,5 +1,6 @@
 import requests
 import pandas as pd
+import numpy as np
 from datetime import datetime, timedelta
 import streamlit as st
 
@@ -175,7 +176,6 @@ def get_live_weather_data(
     # Merge daily and aggregated features
     merged_df = pd.merge(daily_df, daily_means, on="date")
     
-    # Ensure correct column order for the model plus the date for plotting
     features = [
         'date',
         'max_temp','min_temp','avg_temp',
@@ -183,7 +183,18 @@ def get_live_weather_data(
         'pressure','cloud_cover'
     ]
     
-    final_df = merged_df[features]
+    final_df = merged_df[features].copy()
+    
+    # Extract seasonal cyclic logic for new CNN-LSTM features
+    final_df['date_parsed'] = pd.to_datetime(final_df['date'])
+    final_df['month'] = final_df['date_parsed'].dt.month
+    final_df['day_of_year'] = final_df['date_parsed'].dt.dayofyear
+    final_df['month_sin'] = np.sin(2 * np.pi * final_df['month'] / 12.0)
+    final_df['month_cos'] = np.cos(2 * np.pi * final_df['month'] / 12.0)
+    final_df['day_sin'] = np.sin(2 * np.pi * final_df['day_of_year'] / 365.25)
+    final_df['day_cos'] = np.cos(2 * np.pi * final_df['day_of_year'] / 365.25)
+    
+    final_df = final_df.drop(columns=['date_parsed', 'month', 'day_of_year'])
     
     # Return exactly N days (API might sometimes return an extra day due to timezone boundaries)
     return final_df.tail(days)

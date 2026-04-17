@@ -24,7 +24,7 @@ st.set_page_config(
     page_title="SkyCast AI",
     page_icon="🌦️",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded",
 )
 
 st.markdown(
@@ -835,6 +835,205 @@ st.markdown(
         .delay-4 { animation-delay: 0.32s; }
         .delay-5 { animation-delay: 0.4s; }
 
+        /* ── Metric dashboard cards ── */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .metric-card {
+            padding: 1.1rem 1.2rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+            animation: riseIn 0.9s ease-out both;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(104, 215, 255, 0.25);
+            background: rgba(255, 255, 255, 0.055);
+        }
+
+        .metric-card-label {
+            color: var(--muted);
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+        }
+
+        .metric-card-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.7rem;
+            margin-top: 0.3rem;
+            line-height: 1;
+        }
+
+        .metric-card-sub {
+            font-size: 0.8rem;
+            color: #8fb5c8;
+            margin-top: 0.2rem;
+        }
+
+        .metric-card-good { border-color: rgba(110, 231, 183, 0.22); }
+        .metric-card-warn { border-color: rgba(255, 179, 107, 0.22); }
+        .metric-card-accent { border-color: rgba(104, 215, 255, 0.22); }
+
+        .r2-bar-track {
+            background: rgba(255,255,255,0.07);
+            border-radius: 999px;
+            height: 6px;
+            margin-top: 0.55rem;
+            overflow: hidden;
+        }
+        .r2-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #68d7ff, #6ee7b7);
+            transition: width 1.2s ease;
+        }
+
+        /* ── 7-Day forecast strip ── */
+        .forecast-strip {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 0.6rem;
+            margin-top: 1rem;
+        }
+
+        .forecast-day-card {
+            padding: 0.8rem 0.5rem;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            text-align: center;
+            transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+            animation: riseIn 0.9s ease-out both;
+        }
+
+        .forecast-day-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(104, 215, 255, 0.28);
+            background: rgba(255, 255, 255, 0.055);
+        }
+
+        .forecast-day-card.today {
+            border-color: rgba(104, 215, 255, 0.35);
+            background: rgba(104, 215, 255, 0.07);
+        }
+
+        .forecast-day-label {
+            color: var(--muted);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .forecast-day-temp {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            margin-top: 0.3rem;
+        }
+
+        .forecast-day-rain {
+            color: #68d7ff;
+            font-size: 0.78rem;
+            margin-top: 0.2rem;
+        }
+
+        .forecast-day-icon {
+            font-size: 1.3rem;
+            margin-top: 0.25rem;
+        }
+
+        /* ── City comparison ── */
+        .compare-header {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .compare-badge {
+            padding: 0.3rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .compare-badge-a {
+            background: rgba(104, 215, 255, 0.12);
+            border: 1px solid rgba(104, 215, 255, 0.3);
+            color: #68d7ff;
+        }
+
+        .compare-badge-b {
+            background: rgba(255, 179, 107, 0.12);
+            border: 1px solid rgba(255, 179, 107, 0.3);
+            color: #ffb36b;
+        }
+
+        /* ── Uncertainty band legend ── */
+        .ci-legend {
+            display: flex;
+            gap: 1.2rem;
+            align-items: center;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .ci-legend-item {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .ci-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* ── Seasonal band ── */
+        .seasonal-note {
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
+            background: rgba(255, 179, 107, 0.07);
+            border: 1px solid rgba(255, 179, 107, 0.18);
+            color: #f0d0a0;
+            font-size: 0.84rem;
+            line-height: 1.6;
+            margin-top: 0.6rem;
+        }
+
+        /* ── Fallback warning ── */
+        .fallback-banner {
+            padding: 0.75rem 1rem;
+            border-radius: 14px;
+            background: rgba(255, 179, 107, 0.09);
+            border: 1px solid rgba(255, 179, 107, 0.25);
+            color: #f0c87a;
+            font-size: 0.86rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .forecast-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        }
+        @media (max-width: 560px) {
+            .forecast-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .metric-grid { grid-template-columns: minmax(0, 1fr); }
+        }
+
         @keyframes riseIn {
             from {
                 opacity: 0;
@@ -897,6 +1096,145 @@ st.markdown(
                 grid-template-columns: minmax(0, 1fr);
             }
         }
+
+        /* ═══════════════════════════════════════
+           SIDEBAR — match main dark-blue theme
+           ═══════════════════════════════════════ */
+        [data-testid="stSidebar"] {
+            background: linear-gradient(
+                180deg,
+                #03131f 0%,
+                #071b28 60%,
+                #0d2535 100%
+            ) !important;
+            border-right: 1px solid rgba(104, 215, 255, 0.10) !important;
+            box-shadow: 4px 0 24px rgba(0, 0, 0, 0.35);
+        }
+
+        /* Inner scroll container */
+        [data-testid="stSidebar"] > div:first-child {
+            padding-top: 0 !important;
+            background: transparent !important;
+        }
+
+        /* Hide Streamlit's AUTO-GENERATED page nav 
+           (removes the duplicate Dashboard / City Comparison entries) */
+        [data-testid="stSidebarNav"]     { display: none !important; }
+        [data-testid="stSidebarNavItems"]{ display: none !important; }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 1rem 1.2rem 1rem;
+            border-bottom: 1px solid rgba(131, 211, 255, 0.12);
+            margin-bottom: 0.8rem;
+        }
+
+        .sidebar-logo-icon { font-size: 1.5rem; }
+
+        .sidebar-logo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: -0.02em;
+        }
+
+        .sidebar-logo-sub {
+            font-size: 0.7rem;
+            color: var(--muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .nav-section-label {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: rgba(143, 181, 200, 0.55);
+            padding: 0 1rem;
+            margin-top: 0.4rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.55rem 1rem;
+            border-radius: 12px;
+            margin: 0.15rem 0.5rem;
+            cursor: pointer;
+            font-size: 0.88rem;
+            color: var(--muted);
+            transition: background 0.18s ease, color 0.18s ease;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: rgba(104, 215, 255, 0.08);
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background: rgba(104, 215, 255, 0.12);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .nav-item-icon { font-size: 1rem; width: 1.2rem; text-align: center; }
+
+        .nav-divider {
+            height: 1px;
+            background: rgba(131, 211, 255, 0.10);
+            margin: 0.8rem 1rem;
+        }
+
+        .nav-online-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin: 0.5rem 1rem;
+        }
+
+        .nav-online-badge.online {
+            background: rgba(110, 231, 183, 0.10);
+            color: #6ee7b7;
+            border: 1px solid rgba(110, 231, 183, 0.2);
+        }
+
+        .nav-online-badge.offline {
+            background: rgba(255, 179, 107, 0.10);
+            color: #ffb36b;
+            border: 1px solid rgba(255, 179, 107, 0.2);
+        }
+
+        .nav-stat {
+            padding: 0.65rem 1rem;
+            margin: 0.2rem 0.5rem;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .nav-stat-label {
+            font-size: 0.68rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .nav-stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.05rem;
+            margin-top: 0.15rem;
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -917,27 +1255,178 @@ def check_internet():
 is_online = check_internet()
 
 
+# ── Sidebar navigation ──────────────────────────────────────────────────────────
+with st.sidebar:
+    _online_cls   = "online" if is_online else "offline"
+    _online_dot   = "🟢" if is_online else "🟠"
+    _online_label = "Live" if is_online else "Offline"
+
+    st.markdown(
+        f"""
+        <style>
+        /* ── Nav link overrides ── */
+        .nav-item {{
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.6rem 1rem;
+            border-radius: 12px;
+            margin: 0.2rem 0.4rem;
+            font-size: 0.88rem;
+            font-family: 'IBM Plex Sans', sans-serif;
+            color: rgba(143,181,200,0.85);
+            text-decoration: none !important;
+            transition: background 0.18s ease, color 0.18s ease;
+        }}
+        .nav-item:hover {{
+            background: rgba(104,215,255,0.09);
+            color: #e9f6ff;
+            text-decoration: none !important;
+        }}
+        .nav-item.active {{
+            background: rgba(104,215,255,0.13);
+            color: #68d7ff;
+            font-weight: 600;
+        }}
+        .nav-item-icon {{ font-size: 1.05rem; width: 1.3rem; text-align: center; flex-shrink: 0; }}
+        </style>
+
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">🌦️</div>
+            <div>
+                <div class="sidebar-logo-text">SkyCast AI</div>
+                <div class="sidebar-logo-sub">Weather Intelligence</div>
+            </div>
+        </div>
+
+        <div class="nav-section-label">Navigation</div>
+
+        <a class="nav-item active" href="/" target="_self">
+            <span class="nav-item-icon">🏠</span> Dashboard
+        </a>
+        <a class="nav-item" href="/City_Comparison" target="_self">
+            <span class="nav-item-icon">🏙️</span> City Comparison
+        </a>
+        <a class="nav-item" href="/Model_Analytics" target="_self">
+            <span class="nav-item-icon">🤖</span> Model Analytics
+        </a>
+
+        <div class="nav-divider"></div>
+        <div class="nav-section-label">Status</div>
+        <div class="nav-online-badge {_online_cls}">
+            {_online_dot}&nbsp;{_online_label} Data Mode
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+# ── Collapsed mini icon-rail (shown when sidebar is collapsed) ────────────────
+st.markdown(
+    """
+    <style>
+    /* The mini-rail is always injected; JS will toggle visibility */
+    .skycast-mini-rail {
+        position: fixed;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 9999;
+        display: none;          /* hidden by default; JS turns it on */
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 0.45rem;
+        background: linear-gradient(180deg, #03131f 0%, #0d2535 100%);
+        border-right: 1px solid rgba(104,215,255,0.14);
+        border-radius: 0 14px 14px 0;
+        box-shadow: 4px 0 20px rgba(0,0,0,0.4);
+    }
+    .skycast-mini-rail a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.4rem;
+        height: 2.4rem;
+        border-radius: 10px;
+        font-size: 1.15rem;
+        text-decoration: none;
+        color: rgba(143,181,200,0.8);
+        transition: background 0.18s ease, color 0.18s ease, transform 0.15s ease;
+    }
+    .skycast-mini-rail a:hover {
+        background: rgba(104,215,255,0.12);
+        color: #68d7ff;
+        transform: scale(1.1);
+    }
+    .skycast-mini-rail a.active {
+        background: rgba(104,215,255,0.16);
+        color: #68d7ff;
+    }
+    .mini-rail-divider {
+        width: 1.6rem;
+        height: 1px;
+        background: rgba(104,215,255,0.15);
+        margin: 0.1rem 0;
+    }
+    </style>
+
+    <div class="skycast-mini-rail" id="skyCastMiniRail">
+        <a href="/" target="_self" title="Dashboard" class="active">🏠</a>
+        <a href="/City_Comparison" target="_self" title="City Comparison">🏙️</a>
+        <a href="/Model_Analytics" target="_self" title="Model Analytics">🤖</a>
+    </div>
+
+    <script>
+    (function() {
+        /* Poll sidebar width every 120 ms – more reliable than MutationObserver
+           because Streamlit collapses the sidebar with a CSS transition, not
+           an attribute change that fires before the width fully animates. */
+        function syncRail() {
+            var rail    = document.getElementById('skyCastMiniRail');
+            var sidebar = document.querySelector('[data-testid="stSidebar"]');
+            if (!rail) return;
+            if (!sidebar) { rail.style.display = 'none'; return; }
+            /* sidebar width < 64 px = fully collapsed */
+            var collapsed = sidebar.getBoundingClientRect().width < 64;
+            rail.style.display = collapsed ? 'flex' : 'none';
+        }
+        /* Start polling immediately – will no-op until sidebar appears */
+        setInterval(syncRail, 120);
+    })();
+    </script>
+    """,
+    unsafe_allow_html=True,
+)
+
+# ── Paths ──
+_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+_MODEL_PATH   = os.path.join(_ROOT, "models", "lstm_model.h5")
+_SCALER_PATH  = os.path.join(_ROOT, "models", "scaler.pkl")
+_DATA_PATH    = os.path.join(_ROOT, "data", "indian_cities_weather.csv")
+_EVAL_CACHE   = os.path.join(_ROOT, "models", "eval_cache.pkl")
+
+
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model("models/lstm_model.h5", compile=False)
+    return tf.keras.models.load_model(_MODEL_PATH, compile=False)
 
 
 @st.cache_resource
 def load_scaler():
-    return joblib.load("models/scaler.pkl")
+    return joblib.load(_SCALER_PATH)
 
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv("data/indian_cities_weather.csv")
+    df = pd.read_csv(_DATA_PATH)
     df.columns = df.columns.str.strip()
     df = df.rename(
         columns={
             "Date": "date",
             "City": "city",
-            "Temperature_Max (°C)": "max_temp",
-            "Temperature_Min (°C)": "min_temp",
-            "Temperature_Avg (°C)": "avg_temp",
+            "Temperature_Max (\u00b0C)": "max_temp",
+            "Temperature_Min (\u00b0C)": "min_temp",
+            "Temperature_Avg (\u00b0C)": "avg_temp",
             "Humidity (%)": "humidity",
             "Rainfall (mm)": "rainfall",
             "Wind_Speed (km/h)": "wind_speed",
@@ -946,11 +1435,44 @@ def load_data():
         }
     )
     df["date"] = pd.to_datetime(df["date"])
+    
+    # inject cyclical seasonal features
+    df['month'] = df['date'].dt.month
+    df['day_of_year'] = df['date'].dt.dayofyear
+    df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12.0)
+    df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12.0)
+    df['day_sin'] = np.sin(2 * np.pi * df['day_of_year'] / 365.25)
+    df['day_cos'] = np.cos(2 * np.pi * df['day_of_year'] / 365.25)
+    
     return df
 
 
 @st.cache_data
+def get_seasonal_stats():
+    """Per-city, per-month historical average ± std for temperature."""
+    full_df = load_data()
+    full_df["month"] = full_df["date"].dt.month
+    stats = (
+        full_df.groupby(["city", "month"])["avg_temp"]
+        .agg(["mean", "std"])
+        .reset_index()
+        .rename(columns={"mean": "avg_temp_mean", "std": "avg_temp_std"})
+    )
+    return stats
+
+
+@st.cache_data
 def evaluate_saved_model():
+    """Compute evaluation metrics, using a disk cache to avoid recomputing on every load."""
+    model_mtime = os.path.getmtime(_MODEL_PATH)
+    if os.path.exists(_EVAL_CACHE):
+        try:
+            cached = joblib.load(_EVAL_CACHE)
+            if cached.get("model_mtime") == model_mtime:
+                return cached["metrics"]
+        except Exception:
+            pass
+
     dataset = load_data().sort_values(["city", "date"]).reset_index(drop=True)
     scaled_arr = scaler.transform(dataset[features])
     scaled_df = pd.DataFrame(scaled_arr, columns=features)
@@ -985,7 +1507,7 @@ def evaluate_saved_model():
     true_rain = y_true_real[:, 4]
     pred_rain = y_pred_real[:, 4]
 
-    return {
+    metrics = {
         "samples": int(len(X_test)),
         "temp_rmse": float(np.sqrt(mean_squared_error(true_temp, pred_temp))),
         "temp_mae": float(mean_absolute_error(true_temp, pred_temp)),
@@ -994,6 +1516,72 @@ def evaluate_saved_model():
         "rain_mae": float(mean_absolute_error(true_rain, pred_rain)),
         "rain_r2": float(r2_score(true_rain, pred_rain)),
     }
+    try:
+        joblib.dump({"model_mtime": model_mtime, "metrics": metrics}, _EVAL_CACHE)
+    except Exception:
+        pass
+    return metrics
+
+
+def multi_step_forecast(input_df, n_steps=7):
+    """
+    Recursive multi-step forecasting.
+    Returns list of (avg_temp, rainfall) tuples for the next n_steps days.
+    Each step's prediction is fed back as input to the next step.
+    """
+    window = scaler.transform(input_df[features].copy())
+    predictions = []
+    for _ in range(n_steps):
+        X_in = np.expand_dims(window, axis=0)
+        
+        pred_scaled = model(X_in, training=False)
+        pred_temp = pred_scaled[0].numpy()[0, 0]
+        pred_rain_prob = pred_scaled[1].numpy()[0, 0]
+
+        dummy = np.zeros((1, len(features)))
+        dummy[0, 2] = pred_temp
+        dummy[0, 4] = 0.0 # dummy no longer needed for probability decoding
+        real = scaler.inverse_transform(pd.DataFrame(dummy, columns=features))
+        
+        avg_t = float(real[0, 2])
+        rain_prob = max(float(pred_rain_prob), 0.0)
+        predictions.append((avg_t, rain_prob))
+        
+        new_row = window[-1].copy()
+        new_row[2] = pred_temp
+        new_row[4] = pred_rain_prob
+        window = np.vstack([window[1:], new_row])
+        
+    return predictions
+
+
+def mc_dropout_forecast(input_df, n_runs=30):
+    """
+    Monte Carlo Dropout uncertainty estimation.
+    Runs inference n_runs times with training=True (dropout active).
+    Returns (mean_temp, std_temp, mean_rain, std_rain).
+    """
+    window = scaler.transform(input_df[features].copy())
+    X_in = np.expand_dims(window, axis=0)
+    all_preds = []
+    for _ in range(n_runs):
+        pred_scaled = model(X_in, training=True)
+        pt = pred_scaled[0].numpy()[0, 0]
+        pr_prob = pred_scaled[1].numpy()[0, 0]
+        
+        dummy = np.zeros((1, len(features)))
+        dummy[0, 2] = pt
+        dummy[0, 4] = 0.0
+        real = scaler.inverse_transform(pd.DataFrame(dummy, columns=features))
+        all_preds.append([float(real[0, 2]), max(float(pr_prob), 0.0)])
+        
+    all_preds = np.array(all_preds)
+    return (
+        float(np.mean(all_preds[:, 0])),
+        float(np.std(all_preds[:, 0])),
+        float(np.mean(all_preds[:, 1])),
+        float(np.std(all_preds[:, 1])),
+    )
 
 
 def infer_conditions(avg_temp, rainfall, humidity, cloud_cover):
@@ -1191,13 +1779,16 @@ features = [
     "wind_speed",
     "pressure",
     "cloud_cover",
+    "month_sin",
+    "month_cos",
+    "day_sin",
+    "day_cos"
 ]
 SEQ_LEN = 60
 
 model = load_model()
 scaler = load_scaler()
 df = load_data()
-evaluation_metrics = evaluate_saved_model()
 
 cities = sorted(df["city"].unique())
 
@@ -1442,21 +2033,36 @@ prediction_current_avg = float(latest.iloc[-1]["avg_temp"])
 avg_temp_pred = None
 rainfall_pred = None
 
+mc_mean_temp   = None
+mc_std_temp    = None
+mc_mean_rain   = None
+mc_std_rain    = None
+multi_day_preds = []
+
 if st.session_state.get("generate_forecast", False) and success_load:
     with st.spinner("Running neural sequence analysis..."):
+        # ── Single-step deterministic prediction ──
         latest_scaled = scaler.transform(latest[features])
         X_input = np.expand_dims(latest_scaled, axis=0)
-        pred_tensor = model(X_input, training=False)
-        pred = pred_tensor.numpy()
+        
+        pred_scaled = model(X_input, training=False)
+        pred_temp = pred_scaled[0].numpy()[0, 0]
+        pred_rain_prob = pred_scaled[1].numpy()[0, 0]
 
         dummy = np.zeros((1, len(features)))
-        dummy[0, 2] = pred[0][0]
-        dummy[0, 4] = pred[0][1]
+        dummy[0, 2] = pred_temp
+        dummy[0, 4] = 0.0 
         real_pred = scaler.inverse_transform(pd.DataFrame(dummy, columns=features))
 
         avg_temp_pred = float(real_pred[0, 2])
-        rainfall_pred = max(float(real_pred[0, 4]), 0.0)
+        chance_of_rain = max(float(pred_rain_prob), 0.0) * 100.0
         forecast_ready = True
+
+        # ── Monte Carlo Dropout uncertainty ──
+        mc_mean_temp, mc_std_temp, mc_mean_rain, mc_std_rain = mc_dropout_forecast(latest)
+
+        # ── 7-day multi-step recursive forecast ──
+        multi_day_preds = multi_step_forecast(latest, n_steps=7)
 
 recent_temp_mean = latest["avg_temp"].tail(7).mean()
 recent_rain_mean = latest["rainfall"].tail(7).mean()
@@ -1471,12 +2077,12 @@ if forecast_ready:
     forecast_title = "Next-Day Model Forecast"
     forecast_value = f"{avg_temp_pred:.1f}°C"
     forecast_copy = (
-        f"Forecast for <strong>{prediction_label}</strong> with expected rain of "
-        f"<strong>{rainfall_pred:.1f} mm</strong> from the trained predictive model."
+        f"Forecast for <strong>{prediction_label}</strong> with a "
+        f"<strong>{chance_of_rain:.0f}% chance of rain</strong> from the trained classification model."
     )
     forecast_city_value = prediction_label
     forecast_temp_value = f"{avg_temp_pred:.1f}°C"
-    forecast_rain_value = f"{rainfall_pred:.1f} mm"
+    forecast_rain_value = f"{chance_of_rain:.0f}% 🌧️"
     forecast_shift_value = f"{temp_delta_pred:+.1f}°C"
 else:
     temp_delta_pred = 0.0
@@ -1580,7 +2186,11 @@ with control_col:
     st.caption(f"Prediction target: {prediction_label}")
     st.caption(f"Live date: {live_today} • latest data used: {latest_data_date}")
     if load_issue:
-        st.caption(f"Live fetch was unavailable. Using saved history instead.")
+        st.markdown(
+            f'<div class="fallback-banner">⚠️ Live data fetch failed — showing bundled dataset instead. '
+            f'Reason: <em>{load_issue}</em></div>',
+            unsafe_allow_html=True,
+        )
     st.markdown('</div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1687,10 +2297,141 @@ with insight_cols[2]:
 
 st.markdown('<div class="spacer-sm"></div>', unsafe_allow_html=True)
 
+# ═══════════════════════════════════════════════════════════
+# 7-Day Multi-Step Forecast + Confidence Interval Section
+# ═══════════════════════════════════════════════════════════
+if forecast_ready and multi_day_preds:
+    st.markdown(
+        '<div class="section-stack"><div class="section-label">LSTM Forecast Horizon</div>'
+        '<div class="section-title">7-Day Outlook</div></div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<div class="section-copy">Recursive multi-step forecast — each prediction is fed back as input '
+        'for the next day, giving a full week\'s temperature and rainfall outlook.</div>',
+        unsafe_allow_html=True,
+    )
+
+    from datetime import timedelta
+    base_date = datetime.now()
+    day_names = [(base_date + timedelta(days=i+1)).strftime("%a") for i in range(7)]
+    day_dates = [(base_date + timedelta(days=i+1)).strftime("%b %d") for i in range(7)]
+
+    # Weather emoji based on rain
+    def _day_icon(rain, temp):
+        if rain >= 10: return "🌧️"
+        if rain >= 3:  return "🌦️"
+        if temp >= 34: return "☀️"
+        if temp >= 28: return "⛅"
+        return "🌤️"
+
+    strip_html = '<div class="forecast-strip">'
+    for i, (t, r) in enumerate(multi_day_preds):
+        icon = _day_icon(r, t)
+        extra_cls = ' today' if i == 0 else ''
+        strip_html += f'''
+        <div class="forecast-day-card{extra_cls} delay-{min(i+1,5)}">
+            <div class="forecast-day-label">{day_names[i]}<br><span style="font-size:0.68rem;opacity:0.7">{day_dates[i]}</span></div>
+            <div class="forecast-day-icon">{icon}</div>
+            <div class="forecast-day-temp">{t:.1f}°C</div>
+            <div class="forecast-day-rain">💧 {r:.1f} mm</div>
+        </div>'''
+    strip_html += '</div>'
+    st.markdown(strip_html, unsafe_allow_html=True)
+
+    # ── Confidence interval chart for day-1 ──
+    if mc_mean_temp is not None and mc_std_temp is not None:
+        st.markdown('<div class="spacer-sm"></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="section-label" style="margin-top:1rem;">Prediction Uncertainty (MC Dropout • 30 runs)</div>',
+            unsafe_allow_html=True,
+        )
+        temps_arr  = [t for t, _ in multi_day_preds]
+        rains_arr  = [r for _, r in multi_day_preds]
+        # Uncertainty shrinks slightly for further days (conservative estimate)
+        temp_stds  = [mc_std_temp * (1 + 0.12 * i) for i in range(7)]
+        rain_stds  = [mc_std_rain  * (1 + 0.15 * i) for i in range(7)]
+
+        ci_fig = go.Figure()
+        ci_fig.add_trace(go.Scatter(
+            x=day_names, y=[t + s for t, s in zip(temps_arr, temp_stds)],
+            mode='lines', line=dict(width=0),
+            showlegend=False, hoverinfo='skip',
+        ))
+        ci_fig.add_trace(go.Scatter(
+            x=day_names, y=[t - s for t, s in zip(temps_arr, temp_stds)],
+            mode='lines', line=dict(width=0),
+            fill='tonexty',
+            fillcolor='rgba(104,215,255,0.13)',
+            name='Uncertainty band',
+            hoverinfo='skip',
+        ))
+        ci_fig.add_trace(go.Scatter(
+            x=day_names, y=temps_arr,
+            mode='lines+markers',
+            line=dict(color='#68d7ff', width=3),
+            marker=dict(size=7, color='#68d7ff'),
+            name='Forecast temp (°C)',
+            hovertemplate='%{x}: %{y:.1f}°C<extra></extra>',
+        ))
+        ci_fig.update_layout(
+            plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='#d7edf8', family='IBM Plex Sans'),
+            margin=dict(l=10, r=10, t=20, b=10),
+            hovermode='x unified',
+            legend=dict(orientation='h', yanchor='bottom', y=1.02, x=0),
+        )
+        ci_fig.update_xaxes(showgrid=False, zeroline=False, title='')
+        ci_fig.update_yaxes(showgrid=True, gridcolor='rgba(143,181,200,0.12)', zeroline=False, title='')
+        st.plotly_chart(ci_fig, use_container_width=True)
+        st.markdown(
+            f'<div class="ci-legend">'
+            f'<div class="ci-legend-item"><div class="ci-legend-dot" style="background:#68d7ff"></div> Predicted temp</div>'
+            f'<div class="ci-legend-item"><div class="ci-legend-dot" style="background:rgba(104,215,255,0.35)"></div> ±1σ uncertainty band</div>'
+            f'<div class="ci-legend-item" style="color:#8fb5c8;">Day-1 σ: ±{mc_std_temp:.2f}°C (temp) · ±{mc_std_rain:.2f}mm (rain)</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
+    st.markdown('<div class="spacer-sm"></div>', unsafe_allow_html=True)
+
+# ═══════════════════════════════════════════════════════════
+# Bottom Charts Tabs (Temperature, Rainfall, ATM)
+# ═══════════════════════════════════════════════════════════
+
+
 tab_temp, tab_rain, tab_atmos = st.tabs(["Temperature Field", "Rainfall Pulse", "Atmospheric Signals"])
 
 with tab_temp:
+    seasonal_stats = get_seasonal_stats()
+    city_seasonal = seasonal_stats[seasonal_stats["city"] == prediction_fallback_city]
+
     temp_fig = go.Figure()
+
+    # ── Seasonal normal band overlay ──
+    if not city_seasonal.empty:
+        latest_copy = latest.copy()
+        latest_copy["month"] = latest_copy["date"].dt.month
+        merged_seasonal = latest_copy.merge(city_seasonal, on="month", how="left")
+        merged_seasonal = merged_seasonal.sort_values("date")
+        upper_band = merged_seasonal["avg_temp_mean"] + merged_seasonal["avg_temp_std"]
+        lower_band = merged_seasonal["avg_temp_mean"] - merged_seasonal["avg_temp_std"]
+        temp_fig.add_trace(go.Scatter(
+            x=merged_seasonal["date"], y=upper_band,
+            mode='lines', line=dict(width=0), showlegend=False, hoverinfo='skip',
+        ))
+        temp_fig.add_trace(go.Scatter(
+            x=merged_seasonal["date"], y=lower_band,
+            mode='lines', line=dict(width=0),
+            fill='tonexty', fillcolor='rgba(255,179,107,0.10)',
+            name='Seasonal norm ±1σ', hoverinfo='skip',
+        ))
+        temp_fig.add_trace(go.Scatter(
+            x=merged_seasonal["date"], y=merged_seasonal["avg_temp_mean"],
+            mode='lines', line=dict(color='rgba(255,179,107,0.45)', width=1.5, dash='dot'),
+            name='Historical avg', hovertemplate='Seasonal avg: %{y:.1f}°C<extra></extra>',
+        ))
+
     temp_fig.add_trace(
         go.Scatter(
             x=latest["date"],
@@ -1732,6 +2473,25 @@ with tab_temp:
     temp_fig.update_xaxes(showgrid=False, zeroline=False, title="")
     temp_fig.update_yaxes(showgrid=True, gridcolor="rgba(143, 181, 200, 0.12)", zeroline=False, title="")
     st.plotly_chart(temp_fig, use_container_width=True)
+
+    # Seasonal note
+    if not city_seasonal.empty:
+        cur_month = datetime.now().month
+        row = city_seasonal[city_seasonal["month"] == cur_month]
+        if not row.empty:
+            hist_avg = float(row["avg_temp_mean"].iloc[0])
+            hist_std = float(row["avg_temp_std"].iloc[0])
+            obs_avg  = float(latest["avg_temp"].tail(7).mean())
+            diff     = obs_avg - hist_avg
+            direction = "above" if diff > 0 else "below"
+            st.markdown(
+                f'<div class="seasonal-note">📊 <strong>Seasonal context:</strong> '
+                f'{prediction_fallback_city}\'s historical average for this month is '
+                f'<strong>{hist_avg:.1f}°C ± {hist_std:.1f}°C</strong>. '
+                f'The last 7 days averaged <strong>{obs_avg:.1f}°C</strong>, '
+                f'which is <strong>{abs(diff):.1f}°C {direction}</strong> the seasonal norm.</div>',
+                unsafe_allow_html=True,
+            )
 
 with tab_rain:
     rain_fig = px.bar(
